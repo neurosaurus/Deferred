@@ -21,3 +21,5 @@ FRAMEWORK_VERSION = A
 INFOPLIST_FILE = Sources/Info.plist
 PRODUCT_BUNDLE_IDENTIFIER = com.bignerdranch.$(TARGET_NAME)
 PRODUCT_NAME = Deferred
+
+SWIFT_INCLUDE_PATHS = $(inherited) $(SRCROOT)/Sources
