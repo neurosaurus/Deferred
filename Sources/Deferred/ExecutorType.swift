@@ -54,6 +54,8 @@ public protocol ExecutorType {
 
 }
 
+public typealias DefaultExecutor = DispatchQueue
+
 extension ExecutorType {
 
     /// By default, executes the contents of the work item as a closure.
@@ -61,32 +63,40 @@ extension ExecutorType {
         submit(workItem.perform)
     }
 
-    /// By default, `nil`; the executor's `submit(_:)` is used instead.
+    /// By default, `nil`; the executor's `submit(_:)` is always used.
     public var underlyingQueue: DispatchQueue? {
         return nil
     }
     
 }
 
-// A `ExecutorType` wrapper for a `dispatch_queue_t`.
-//
-// In Swift 2.2, dispatch queues are protocol objects, and cannot be made to
-// conform to other protocols. If this changes in the future, and
-// `dispatch_queue_t` can be made to conform to `ExecutorType` directly, the
-// overloads referenced above can be removed.
-struct QueueExecutor: ExecutorType {
+/// Dispatch queues invoke function bodies submitted to them serially in FIFO
+/// order. A queue will only invoke one-at-a-time, but independent queues may
+/// each invoke concurrently with respect to each other.
+extension DispatchQueue: ExecutorType {
 
-    private let queue: DispatchQueue
+    /// Submits a function `body` for asynchronous execution.
+    public func submit(_ body: @escaping() -> Void) {
+        async(execute: body)
+    }
+
+    /// Submits a cancellable `workItem` for asynchronous execution.
+    public func submit(_ workItem: DispatchWorkItem) {
+        async(execute: workItem)
+    }
+
+    /// Returns `self`.
+    public var underlyingQueue: DispatchQueue? {
+        return self
+    }
+
+}
+
+@available(*, unavailable, message: "Use DispatchQueue directly.")
+struct QueueExecutor {
+
     init(_ queue: DispatchQueue) {
-        self.queue = queue
-    }
-
-    func submit(_ body: @escaping() -> Void) {
-        queue.async(execute: body)
-    }
-
-    var underlyingQueue: DispatchQueue? {
-        return queue
+        fatalError("Unavailable type cannot be created.")
     }
 
 }
