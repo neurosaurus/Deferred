@@ -38,7 +38,7 @@ class TaskTests: XCTestCase {
 
         d.succeed(1)
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testUponFailure() {
@@ -51,7 +51,7 @@ class TaskTests: XCTestCase {
 
         d.fail(Error.first)
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testThatMapPassesThroughErrors() {
@@ -71,7 +71,7 @@ class TaskTests: XCTestCase {
             afterExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testThatThrowingMapSubstitutesWithError() {
@@ -93,7 +93,7 @@ class TaskTests: XCTestCase {
             afterExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testThatFlatMapForwardsCancellationToSubsequentTask() {
@@ -106,7 +106,7 @@ class TaskTests: XCTestCase {
 
         afterTask.cancel()
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testThatThrowingFlatMapSubstitutesWithError() {
@@ -122,7 +122,7 @@ class TaskTests: XCTestCase {
             afterExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testThatRecoverPassesThroughValues() {
@@ -142,7 +142,7 @@ class TaskTests: XCTestCase {
             afterExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testThatRecoverMapsFailures() {
@@ -162,7 +162,7 @@ class TaskTests: XCTestCase {
             afterExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
 }
@@ -179,7 +179,7 @@ class TaskCustomExecutorTests: CustomExecutorTestCase {
 
         d.succeed(1)
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
         assertExecutorCalledAtLeastOnce()
     }
 
@@ -193,7 +193,7 @@ class TaskCustomExecutorTests: CustomExecutorTestCase {
 
         d.fail(Error.first)
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
         assertExecutorCalledAtLeastOnce()
     }
 
@@ -216,7 +216,7 @@ class TaskCustomExecutorTests: CustomExecutorTestCase {
             afterExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
         assertExecutorCalled(3)
     }
 
@@ -230,7 +230,7 @@ class TaskCustomExecutorTests: CustomExecutorTestCase {
 
         afterTask.cancel()
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
         assertExecutorCalled(1)
     }
 
@@ -247,7 +247,7 @@ class TaskCustomExecutorTests: CustomExecutorTestCase {
             afterExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
         assertExecutorCalledAtLeastOnce()
     }
 
@@ -268,7 +268,7 @@ class TaskCustomExecutorTests: CustomExecutorTestCase {
             afterExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
         assertExecutorCalled(1)
     }
 
@@ -289,7 +289,7 @@ class TaskCustomQueueTests: CustomQueueTestCase {
 
         d.succeed(1)
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testUponFailure() {
@@ -305,7 +305,7 @@ class TaskCustomQueueTests: CustomQueueTestCase {
 
         d.fail(Error.first)
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testThatThrowingMapSubstitutesWithError() {
@@ -328,7 +328,7 @@ class TaskCustomQueueTests: CustomQueueTestCase {
             afterExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testThatFlatMapForwardsCancellationToSubsequentTask() {
@@ -342,7 +342,7 @@ class TaskCustomQueueTests: CustomQueueTestCase {
 
         afterTask.cancel()
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testThatThrowingFlatMapSubstitutesWithError() {
@@ -358,7 +358,7 @@ class TaskCustomQueueTests: CustomQueueTestCase {
             afterExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
     func testThatRecoverMapsFailures() {
@@ -381,7 +381,7 @@ class TaskCustomQueueTests: CustomQueueTestCase {
             afterExpectation.fulfill()
         }
 
-        waitForExpectations(timeout: TestTimeout, handler: nil)
+        waitForExpectations()
     }
 
 }
