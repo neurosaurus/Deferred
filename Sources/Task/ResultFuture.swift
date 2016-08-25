@@ -12,13 +12,13 @@ import Result
 #endif
 import Dispatch
 
-private func commonUponSuccess<Result: ResultType>(body: Result.Value -> Void) -> (Result) -> Void {
+private func commonUponSuccess<Result: ResultType>(_ body: @escaping(Result.Value) -> Void) -> (Result) -> Void {
     return { result in
         result.withValues(ifSuccess: body, ifFailure: { _ in () })
     }
 }
 
-private func commonUponFailure<Result: ResultType>(body: ErrorType -> Void) -> (Result) -> Void {
+private func commonUponFailure<Result: ResultType>(_ body: @escaping(Error) -> Void) -> (Result) -> Void {
     return { result in
         result.withValues(ifSuccess: { _ in () }, ifFailure: body)
     }
@@ -30,7 +30,7 @@ extension FutureType where Value: ResultType {
     /// - parameter executor: A context for handling the `body` on fill.
     /// - parameter body: A closure that uses the determined success value.
     /// - seealso: upon(_:body:)
-    public func uponSuccess(executor: ExecutorType, body: Value.Value -> Void) {
+    public func uponSuccess(_ executor: ExecutorType, _ body: @escaping(Value.Value) -> Void) {
         upon(executor, body: commonUponSuccess(body))
     }
 
@@ -39,7 +39,7 @@ extension FutureType where Value: ResultType {
     /// - parameter executor: A context for handling the `body` on fill.
     /// - parameter body: A closure that uses the determined failure value.
     /// - seealso: upon(_:body:)
-    public func uponFailure(executor: ExecutorType, body: ErrorType -> Void) {
+    public func uponFailure(_ executor: ExecutorType, _ body: @escaping(Error) -> Void) {
         upon(executor, body: commonUponFailure(body))
     }
 
@@ -47,7 +47,7 @@ extension FutureType where Value: ResultType {
     ///
     /// - seealso: `uponSuccess(_:body:)`.
     /// - seealso: `upon(_:body:)`.
-    public func uponSuccess(queue: dispatch_queue_t, body: Value.Value -> Void) {
+    public func uponSuccess(_ queue: DispatchQueue, _ body: @escaping(Value.Value) -> Void) {
         upon(queue, body: commonUponSuccess(body))
     }
 
@@ -55,7 +55,7 @@ extension FutureType where Value: ResultType {
     ///
     /// - seealso: `uponFailure(_:body:)`.
     /// - seealso: `upon(_:body:)`.
-    public func uponFailure(queue: dispatch_queue_t, body: ErrorType -> Void) {
+    public func uponFailure(_ queue: DispatchQueue, _ body: @escaping(Error) -> Void) {
         upon(queue, body: commonUponFailure(body))
     }
 
@@ -63,14 +63,14 @@ extension FutureType where Value: ResultType {
     /// a value.
     ///
     /// - seealso: `uponSuccess(_:body:)`.
-    public func uponSuccess(body: Value.Value -> Void) {
+    public func uponSuccess(_ body: @escaping(Value.Value) -> Void) {
         upon(Self.genericQueue, body: commonUponSuccess(body))
     }
 
     /// Call some `body` in the background if the future produces an error.
     ///
     /// - seealso: `uponFailure(_:body:)`.
-    public func uponFailure(body: ErrorType -> Void) {
+    public func uponFailure(_ body: @escaping(Error) -> Void) {
         upon(Self.genericQueue, body: commonUponFailure(body))
     }
 }
@@ -83,8 +83,8 @@ extension FutureType where Value: ResultType {
 private struct LazyMapFuture<Base: FutureType, NewValue>: FutureType {
 
     let base: Base
-    let transform: Base.Value -> NewValue
-    init(_ base: Base, transform: Base.Value -> NewValue) {
+    let transform: (Base.Value) -> NewValue
+    init(_ base: Base, transform: @escaping(Base.Value) -> NewValue) {
         self.base = base
         self.transform = transform
     }
@@ -96,7 +96,7 @@ private struct LazyMapFuture<Base: FutureType, NewValue>: FutureType {
     ///
     /// - parameter queue: A dispatch queue to execute the function `body` on.
     /// - parameter body: A function that uses the delayed value.
-    func upon(executor: ExecutorType, body: NewValue -> Void) {
+    func upon(_ executor: ExecutorType, body: @escaping(NewValue) -> Void) {
         return base.upon(executor) { [transform] in
             body(transform($0))
         }
@@ -104,7 +104,7 @@ private struct LazyMapFuture<Base: FutureType, NewValue>: FutureType {
 
     /// Waits synchronously, for a maximum `time`, for the calculated value to
     /// become determined; otherwise, returns `nil`.
-    func wait(time: Timeout) -> NewValue? {
+    func wait(_ time: Timeout) -> NewValue? {
         return base.wait(time).map(transform)
     }
     
@@ -112,7 +112,7 @@ private struct LazyMapFuture<Base: FutureType, NewValue>: FutureType {
 
 extension Future where Value: ResultType {
     /// Create a future having the same underlying task as `other`.
-    public init<Other: FutureType where Other.Value: ResultType, Other.Value.Value == Value.Value>(task other: Other) {
+    public init<Other: FutureType>(task other: Other) where Other.Value: ResultType, Other.Value.Value == Value.Value {
         self.init(LazyMapFuture(other) {
             Value(with: $0.extract)
         })

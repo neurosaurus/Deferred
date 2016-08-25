@@ -14,19 +14,19 @@ import Dispatch
 
 private extension ResultType {
     func ignored() -> TaskResult<Void> {
-        return withValues(ifSuccess: { _ in TaskResult.Success() }, ifFailure: TaskResult.Failure)
+        return withValues(ifSuccess: { _ in TaskResult.success() }, ifFailure: TaskResult.failure)
     }
 }
 
-public struct IgnoringTask<Base: FutureType where Base.Value: ResultType> {
+public struct IgnoringTask<Base: FutureType> where Base.Value: ResultType {
     public typealias Result = TaskResult<Void>
 
-    private let base: Base
-    private let cancellation: Cancellation
+    fileprivate let base: Base
+    fileprivate let cancellation: Cancellation
 
     /// Creates an event given with a `base` future and an optional
     /// `cancellation`.
-    private init(_ base: Base, cancellation: Cancellation) {
+    fileprivate init(_ base: Base, cancellation: Cancellation) {
         self.base = base
         self.cancellation = cancellation
     }
@@ -39,7 +39,7 @@ extension IgnoringTask: FutureType {
     /// queue immediately. An `upon` call is always execute asynchronously.
     ///
     /// - parameter queue: A dispatch queue for executing the given function on.
-    public func upon(executor: ExecutorType, body: Result -> ()) {
+    public func upon(_ executor: ExecutorType, body: @escaping(Result) -> ()) {
         return base.upon(executor) { body($0.ignored()) }
     }
 
@@ -49,7 +49,7 @@ extension IgnoringTask: FutureType {
     ///
     /// - parameter time: A length of time to wait for event to complete.
     /// - returns: Nothing, if filled within the timeout, or `nil`.
-    public func wait(time: Timeout) -> Result? {
+    public func wait(_ time: Timeout) -> Result? {
         return base.wait(time).map { $0.ignored() }
     }
 }

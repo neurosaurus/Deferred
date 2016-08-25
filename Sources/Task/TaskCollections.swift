@@ -12,7 +12,7 @@ import Result
 #endif
 import Dispatch
 
-extension CollectionType where Generator.Element: TaskType {
+extension Collection where Iterator.Element: TaskType {
     /// Compose a number of tasks into a single notifier task.
     ///
     /// If any of the contained tasks fail, the returned task will be determined
@@ -23,25 +23,25 @@ extension CollectionType where Generator.Element: TaskType {
             return Task(value: ())
         }
 
-        let group = dispatch_group_create()
+        let group = DispatchGroup()
         let coalescingDeferred = Deferred<Task<Void>.Result>()
         var cancellations = [Cancellation]()
-        cancellations.reserveCapacity(numericCast(underestimateCount()))
+        cancellations.reserveCapacity(numericCast(underestimatedCount))
 
         for task in self {
             cancellations.append(task.cancel)
 
-            dispatch_group_enter(group)
+            group.enter()
             task.upon { result in
                 result.withValues(ifSuccess: { _ in }, ifFailure: { error in
-                    _ = coalescingDeferred.fill(.Failure(error))
+                    _ = coalescingDeferred.fill(.failure(error))
                 })
-                dispatch_group_leave(group)
+                group.leave()
             }
         }
 
-        dispatch_group_notify(group, Task<Void>.genericQueue) {
-            _ = coalescingDeferred.fill(.Success())
+        group.notify(queue: Task<Void>.genericQueue) {
+            _ = coalescingDeferred.fill(.success())
         }
 
         return Task(coalescingDeferred) { _ in

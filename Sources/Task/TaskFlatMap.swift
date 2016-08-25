@@ -12,7 +12,7 @@ import Result
 #endif
 import Dispatch
 
-private func commonFlatMap<OldResult: ResultType, NewTask: TaskType>(startNextTask: OldResult.Value throws -> NewTask, cancellationToken: Deferred<Void>) -> (OldResult) -> Future<NewTask.Value> {
+private func commonFlatMap<OldResult: ResultType, NewTask: TaskType>(_ startNextTask: @escaping(OldResult.Value) throws -> NewTask, cancellationToken: Deferred<Void>) -> (OldResult) -> Future<NewTask.Value> {
     return { result in
         do {
             let newTask = try startNextTask(result.extract())
@@ -37,7 +37,7 @@ extension TaskType {
     /// `startNextTask` closure. `flatMap` submits `startNextTask` to `executor`
     /// once the task completes successfully.
     /// - seealso: FutureType.flatMap(upon:_:)
-    public func flatMap<NewTask: TaskType>(upon executor: ExecutorType, _ startNextTask: OldSuccessValue throws -> NewTask) -> Task<NewTask.Value.Value> {
+    public func flatMap<NewTask: TaskType>(upon executor: ExecutorType, _ startNextTask: @escaping(OldSuccessValue) throws -> NewTask) -> Task<NewTask.Value.Value> {
         let cancellationToken = Deferred<Void>()
         let mapped = flatMap(upon: executor, commonFlatMap(startNextTask, cancellationToken: cancellationToken))
         return Task(mapped) { _ = cancellationToken.fill() }
@@ -51,7 +51,7 @@ extension TaskType {
     /// asynchronously once the task completes successfully.
     /// - seealso: flatMap(upon:_:)
     /// - seealso: FutureType.flatMap(upon:_:)
-    public func flatMap<NewTask: TaskType>(upon queue: dispatch_queue_t, _ startNextTask: OldSuccessValue throws -> NewTask) -> Task<NewTask.Value.Value> {
+    public func flatMap<NewTask: TaskType>(upon queue: DispatchQueue, _ startNextTask: @escaping(OldSuccessValue) throws -> NewTask) -> Task<NewTask.Value.Value> {
         let cancellationToken = Deferred<Void>()
         let mapped = flatMap(upon: queue, commonFlatMap(startNextTask, cancellationToken: cancellationToken))
         return Task(mapped) { _ = cancellationToken.fill() }
@@ -65,7 +65,7 @@ extension TaskType {
     /// background once the task completes successfully.
     /// - seealso: flatMap(upon:_:)
     /// - seealso: FutureType.flatMap(_:)
-    public func flatMap<NewTask: TaskType>(startNextTask: OldSuccessValue throws -> NewTask) -> Task<NewTask.Value.Value> {
+    public func flatMap<NewTask: TaskType>(_ startNextTask: @escaping(OldSuccessValue) throws -> NewTask) -> Task<NewTask.Value.Value> {
         let cancellationToken = Deferred<Void>()
         let mapped = flatMap(commonFlatMap(startNextTask, cancellationToken: cancellationToken))
         return Task(mapped) { _ = cancellationToken.fill() }
